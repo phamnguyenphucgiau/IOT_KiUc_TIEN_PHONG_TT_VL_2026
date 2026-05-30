@@ -1,0 +1,30 @@
+# Python environments
+venv/
+env/
+.env
+__pycache__/
+*.pyc
+
+# SadTalker / AI Checkpoints (QUAN TRỌNG: Không được đẩy lên Github vì quá nặng)
+**/checkpoints/
+**/weights/
+*.pth
+*.pt
+*.onnx
+
+# Outputs / Uploads
+**/unified_outputs/
+**/unified_uploads/
+**/unified_temp/
+
+# Logs & DB
+*.log
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+.cmake320/
+.cmake324/
+.cmake327/

@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Living Memory Frame</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #0a0a0c;
+      --bg-glass: rgba(25, 25, 30, 0.6);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --text-primary: #f0f0f5;
+      --text-muted: #9aa0a6;
+      --accent: #d4af37;
+      /* Soft gold */
+      --accent-hover: #f1c40f;
+      --font-ui: 'Inter', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-ui);
+      background: radial-gradient(circle at 50% 0%, #1a1a24 0%, var(--bg-primary) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 42px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff, #d4af37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 20px rgba(212, 175, 55, 0.2);
+    }
+
+    .muted {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: #ccc;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="file"],
+    textarea {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
+      border-radius: 12px;
+      padding: 14px;
+      font-family: var(--font-ui);
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="file"]:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    .btn {
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      padding: 12px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status {
+      margin-top: auto;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border-glass);
+      background: rgba(0, 0, 0, 0.2);
+      font-size: 13px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .status.show {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .videoBox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      border-radius: 16px;
+      overflow: hidden;
+      min-height: 400px;
+      box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.02);
+      position: relative;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .log {
+      margin-top: 16px;
+      max-height: 120px;
+      overflow-y: auto;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 11px;
+      color: #888;
+      white-space: pre-wrap;
+    }
+
+    .chip {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .chatbox {
+      border: 1px solid var(--border-glass);
+      border-radius: 12px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.3);
+      height: 220px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-msg {
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 90%;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .chat-user-wrapper {
+      align-self: flex-end;
+      background: rgba(255, 255, 255, 0.1);
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-ai-wrapper {
+      align-self: flex-start;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-user {
+      color: #fff;
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 4px;
+      display: block;
+      opacity: 0.7;
+    }
+
+    .chat-ai {
+      color: var(--accent);
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .toggle-ai {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    .toggle-ai input {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header style="position: relative;">
+      <h1>Living Memory Frame</h1>
+      <div class="muted">
+        Reviving memories through AI. Connect and converse in real-time.
+      </div>
+      <!-- User Profile Header -->
+      <div id="userProfile"
+        style="position: absolute; top: 0; right: 0; display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border-glass);">
+        <span style="font-size: 13px; color: #ccc;" id="userNameDisplay">Loading...</span>
+        <a href="/logout"
+          style="color: #ff4a4a; text-decoration: none; font-size: 12px; font-weight: bold; background: rgba(255,74,74,0.1); padding: 4px 10px; border-radius: 12px; transition: all 0.2s;">Logout</a>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Control Panel -->
+      <div class="card">
+        <div class="field">
+          <label>📸 Portrait Image</label>
+          <input type="file" id="image" accept="image/*" />
+          <div class="muted" id="imgName" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="field">
+          <label>💬 Conversation</label>
+          <div class="chatbox" id="chatbox">
+            <div class="muted" style="text-align: center; margin-top: 80px; opacity: 0.5;">
+              Start the live session, type a message, and press Send...
+            </div>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom: 24px;">
+          <textarea id="text" placeholder="Type your message here..."></textarea>
+          <div class="row" style="margin-top:12px; justify-content: space-between;">
+            <div class="row">
+              <button class="btn btn-primary" id="btnSendText" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Send
+              </button>
+              <label class="toggle-ai">
+                <input type="checkbox" id="useAI" checked> Enable AI Assistant
+              </label>
+            </div>
+            <div class="muted">Target: <span class="chip" id="chunkTarget">~2 sentences</span></div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: auto; border-top: 1px solid var(--border-glass); padding-top: 20px;">
+          <button class="btn btn-primary" id="btnStart">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            Start Live
+          </button>
+          <button class="btn" id="btnStop" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            </svg>
+            Stop
+          </button>
+          <button class="btn" id="btnClear" disabled>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            Clear Queue
+          </button>
+        </div>
+
+        <div class="status" id="statusBox">
+          <div><strong>Status:</strong> <span id="statusText" style="color: #fff;">-</span></div>
+          <div style="margin-top:6px;"><strong>Queue:</strong> <span id="queueText"
+              style="color: var(--accent);">0</span> items pending</div>
+        </div>
+      </div>
+
+      <!-- Video Display -->
+      <div class="card" style="padding: 16px;">
+        <div class="videoBox">
+          <video id="player" controls playsinline></video>
+        </div>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Fetch User Profile on load
+    async function fetchUserProfile() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res.ok) {
+          const data = await res.json();
+          document.getElementById('userNameDisplay').textContent = "👤 " + data.name;
+        } else {
+          window.location.href = "/login";
+        }
+      } catch (err) {
+        console.error("Failed to load user profile");
+      }
+    }
+    fetchUserProfile();
+
+    const state = {
+      started: false,
+      taskId: null,
+      imagePath: null,
+      idleVideoUrl: null,
+      queue: [],
+      playbackQueue: [], // Array of {url, text}
+      lastSentText: "",
+      rendering: false,
+      playingChunk: false,
+      abortController: null
+    };
+
+    const els = {
+      image: document.getElementById('image'),
+      imgName: document.getElementById('imgName'),
+      text: document.getElementById('text'),
+      btnSendText: document.getElementById('btnSendText'),
+      useAI: document.getElementById('useAI'),
+      chatbox: document.getElementById('chatbox'),
+      btnStart: document.getElementById('btnStart'),
+      btnStop: document.getElementById('btnStop'),
+      btnClear: document.getElementById('btnClear'),
+      player: document.getElementById('player'),
+      statusBox: document.getElementById('statusBox'),
+      statusText: document.getElementById('statusText'),
+      queueText: document.getElementById('queueText'),
+      log: document.getElementById('log')
+    };
+
+    function appendChat(sender, msg, isTemp = false) {
+      if (els.chatbox.innerHTML.includes("Start the live session")) els.chatbox.innerHTML = "";
+
+      const div = document.createElement('div');
+      div.className = sender === 'AI' ? 'chat-msg chat-ai-wrapper' : 'chat-msg chat-user-wrapper';
+      if (isTemp) div.id = 'tempChat';
+
+      const role = sender === 'AI' ? '<span class="chat-ai">Assistant</span>' : '<span class="chat-user">You</span>';
+      div.innerHTML = `${role} <div>${msg}</div>`;
+      els.chatbox.appendChild(div);
+      els.chatbox.scrollTop = els.chatbox.scrollHeight;
+    }
+
+    function removeTempChat() {
+      const temp = document.getElementById('tempChat');
+      if (temp) temp.remove();
+    }
+
+    function appendOrUpdateAIChat(text) {
+      const msgs = els.chatbox.querySelectorAll('.chat-msg');
+      const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1] : null;
+
+      if (lastMsg && lastMsg.classList.contains('chat-ai-wrapper') && lastMsg.id !== 'tempChat') {
+        const textDiv = lastMsg.querySelector('div');
+        textDiv.innerHTML += " " + text;
+      } else {
+        appendChat("AI", text);
+      }
+      els.chatbox.scrollTop = els.chatbox.scrollHeight;
+    }
+
+    function log(line) {
+      els.log.textContent += (line + "\n");
+      els.log.scrollTop = els.log.scrollHeight;
+    }
+    function setStatus(msg) {
+      els.statusText.textContent = msg;
+      els.statusBox.classList.add('show');
+    }
+    function setQueue(n) {
+      els.queueText.textContent = String(n);
+    }
+
+    function splitIntoChunks(text) {
+      const parts = text
+        .replace(/\s+/g, ' ')
+        .split(/([.!?]+)\s*/g)
+        .filter(Boolean);
+
+      const segments = [];
+      for (let i = 0; i < parts.length; i += 2) {
+        const s = (parts[i] || '').trim();
+        const punct = (parts[i + 1] || '').trim();
+        if (!s) continue;
+        segments.push((s + (punct || '')).trim());
+      }
+
+      const chunks = [];
+      let buf = [];
+      for (const seg of segments) {
+        buf.push(seg);
+        if (buf.length >= 2) {
+          chunks.push(buf.join(' '));
+          buf = [];
+        }
+      }
+      if (buf.length) chunks.push(buf.join(' '));
+      return chunks.filter(c => c.trim().length > 0);
+    }
+
+    async function uploadImageIfNeeded() {
+      if (state.imagePath) return;
+
+      if (!els.image.files.length) throw new Error("Please select a portrait image first.");
+      const fd = new FormData();
+      fd.append('image', els.image.files[0]);
+
+      setStatus("Uploading image...");
+      const res = await fetch('/api/live/upload_image', { method: 'POST', body: fd });
+      if (!res.ok) throw new Error("Failed to upload image.");
+      const data = await res.json();
+      state.taskId = data.task_id;
+      state.imagePath = data.image_path;
+      log("task_id=" + state.taskId);
+
+      setStatus("Initializing AI model (generating idle state)...");
+      const resIdle = await fetch('/api/live/generate_idle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_id: state.taskId, image_path: state.imagePath })
+      });
+      if (!resIdle.ok) {
+        const errData = await resIdle.json().catch(() => ({ error: "Failed to create idle video." }));
+        throw new Error(errData.error || "Failed to create idle video.");
+      }
+      const dataIdle = await resIdle.json();
+      state.idleVideoUrl = dataIdle.idle_video_url;
+      log("Idle video ready.");
+
+      playNext();
+    }
+
+    async function playNext() {
+      if (state.playingChunk) {
+        return;
+      }
+
+      if (state.playbackQueue.length > 0) {
+        state.playingChunk = true;
+        const item = state.playbackQueue.shift();
+        els.player.src = item.url;
+        els.player.loop = false;
+
+        // Sync the text to screen right as the video starts!
+        removeTempChat(); // Remove "Rendering..." if it exists
+        appendOrUpdateAIChat(item.text);
+
+        els.player.onended = () => {
+          state.playingChunk = false;
+          playNext();
+        };
+
+        await els.player.play().catch(() => { });
+      } else {
+        if (!state.rendering && state.queue.length === 0) {
+          if (state.idleVideoUrl && (!els.player.src || !els.player.src.endsWith(state.idleVideoUrl))) {
+            els.player.src = state.idleVideoUrl;
+            els.player.loop = true;
+            els.player.onended = null;
+            await els.player.play().catch(() => { });
+          }
+        }
+      }
+    }
+
+    function enqueueTextChunk(textChunk) {
+      state.queue.push(textChunk);
+      setQueue(state.queue.length);
+      processQueue();
+    }
+
+    async function processQueue() {
+      if (!state.started) return;
+      if (state.rendering) return;
+      if (!state.queue.length) return;
+
+      state.rendering = true;
+      const chunkText = state.queue.shift();
+      setQueue(state.queue.length);
+
+      try {
+        setStatus("Rendering lip-sync...");
+        log("Rendering chunk: " + chunkText);
+
+        const abort = new AbortController();
+        state.abortController = abort;
+
+        const res = await fetch('/api/live/render_chunk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            task_id: state.taskId,
+            image_path: state.imagePath,
+            text: chunkText
+          }),
+          signal: abort.signal
+        });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: "Render failed" }));
+          throw new Error((err.error || "Render chunk failed") + (err.detail ? " | " + err.detail : ""));
+        }
+
+        const data = await res.json();
+        const url = data.chunk_video_url;
+        log("Chunk complete.");
+
+        state.playbackQueue.push({ url: url, text: chunkText });
+        playNext();
+
+      } catch (err) {
+        log("ERR: " + err.message);
+        setStatus("Render Error: " + err.message);
+        state.queue = [];
+        setQueue(0);
+      } finally {
+        state.rendering = false;
+        setStatus(state.queue.length ? "Rendering next part..." : "Ready. Waiting for input...");
+        playNext();
+        processQueue();
+      }
+    }
+
+    els.btnSendText.addEventListener('click', async () => {
+      if (!state.started) return;
+
+      const current = els.text.value || "";
+      if (current.trim().length === 0) return;
+
+      els.text.value = "";
+      appendChat("User", current);
+
+      let textToSpeak = current;
+
+      if (els.useAI.checked) {
+        els.btnSendText.disabled = true;
+        appendChat("AI", "<i style='opacity:0.7'>Thinking...</i>", true);
+        try {
+          const res = await fetch('/api/live/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: current })
+          });
+          const data = await res.json();
+          removeTempChat();
+
+          if (!res.ok) {
+            appendChat("AI", `<span style="color:#ff4a4a">${data.error || 'API Error'}</span>`);
+            els.btnSendText.disabled = false;
+            return;
+          }
+
+          textToSpeak = data.reply;
+          // Change "Thinking..." to "Rendering..." so user knows it's doing something
+          const temp = document.getElementById('tempChat');
+          if (temp) temp.innerHTML = '<span class="chat-ai">Assistant</span> <div><i style="opacity:0.7">Rendering video...</i></div>';
+
+        } catch (err) {
+          removeTempChat();
+          appendChat("AI", `<span style="color:#ff4a4a">Network Error: ${err.message}</span>`);
+          els.btnSendText.disabled = false;
+          return;
+        }
+        els.btnSendText.disabled = false;
+      }
+
+      const chunks = splitIntoChunks(textToSpeak);
+      for (const c of chunks) {
+        if (c.trim().length > 0) enqueueTextChunk(c);
+      }
+      state.lastSentText = "";
+    });
+
+    els.image.addEventListener('change', () => {
+      if (!els.image.files || els.image.files.length === 0) {
+        els.imgName.textContent = "";
+        return;
+      }
+
+      els.imgName.textContent = els.image.files[0].name;
+
+      // Reset everything
+      state.started = false;
+      state.taskId = null;
+      state.imagePath = null;
+      state.idleVideoUrl = null;
+      state.queue = [];
+      state.playbackQueue = [];
+      state.playingChunk = false;
+      state.rendering = false;
+      state.lastSentText = "";
+
+      if (state.abortController) {
+        try { state.abortController.abort(); } catch { }
+      }
+
+      setQueue(0);
+      els.player.pause();
+      els.player.src = "";
+      els.player.load();
+
+      // Reset UI elements
+      els.btnStart.disabled = false;
+      els.btnStop.disabled = true;
+      els.btnClear.disabled = true;
+      els.btnSendText.disabled = true;
+
+      // Clear chatbox but keep the placeholder
+      els.chatbox.innerHTML = `
+        <div class="muted" style="text-align: center; margin-top: 80px; opacity: 0.5;">
+          Start the live session, type a message, and press Send...
+        </div>
+      `;
+
+      setStatus("New image selected. Click 'Start Live' to initialize.");
+      log("Reset session for new portrait image.");
+    });
+
+    els.btnStart.addEventListener('click', async () => {
+      try {
+        state.started = true;
+        els.btnStart.disabled = true;
+        els.btnStop.disabled = false;
+        els.btnClear.disabled = false;
+
+        state.queue = [];
+        state.lastSentText = "";
+
+        setStatus("Starting live session...");
+        await uploadImageIfNeeded();
+        els.btnSendText.disabled = false;
+        setStatus("Ready. Type a message to start.");
+
+      } catch (e) {
+        state.started = false;
+        els.btnStart.disabled = false;
+        els.btnStop.disabled = true;
+        els.btnClear.disabled = true;
+        setStatus("Error: " + e.message);
+        log("ERR: " + e.message);
+      }
+    });
+
+    els.btnStop.addEventListener('click', () => {
+      state.started = false;
+      els.btnStart.disabled = false;
+      els.btnStop.disabled = true;
+      els.btnClear.disabled = true;
+      els.btnSendText.disabled = true;
+
+      if (state.abortController) {
+        try { state.abortController.abort(); } catch { }
+      }
+      state.queue = [];
+      state.playbackQueue = [];
+      setQueue(0);
+      els.player.pause();
+      setStatus("Stopped. You can start again.");
+      log("Session stopped.");
+    });
+
+    els.btnClear.addEventListener('click', () => {
+      state.queue = [];
+      state.playbackQueue = [];
+      setQueue(0);
+      setStatus("Queue cleared.");
+      log("Queue cleared.");
+      playNext();
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,44 @@
+{
+  "device": "cuda",
+  "cuda_available": true,
+  "pytorch_version": "2.12.0+cu126",
+  "python_version": "3.14",
+  "components": {
+    "PyTorch": "OK",
+    "OpenCV": "OK",
+    "Flask": "OK",
+    "Pillow": "OK",
+    "NumPy": "OK",
+    "SciPy": "OK",
+    "Librosa": "OK",
+    "Kornia": "OK",
+    "Face Alignment": "OK",
+    "Gradio": "OK"
+  },
+  "paths": {
+    "SadTalker directory": "OK",
+    "VideoReTalking directory": "OK",
+    "SadTalker models": "OK",
+    "VideoReTalking models": "MISSING",
+    "Face Swap backend": "OK"
+  },
+  "status": {
+    "SadTalker Face Landmarks": "MISSING",
+    "SadTalker Generator Model": "MISSING",
+    "VideoReTalking Detection": "MISSING",
+    "VideoReTalking Parsing": "MISSING"
+  },
+  "gpu": {
+    "available": true,
+    "device_name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "total_memory_gb": 3.99951171875,
+    "device_count": 1
+  },
+  "ffmpeg": "OK",
+  "performance": {
+    "device": "GPU",
+    "estimated_sadtalker_seconds": 120,
+    "estimated_retalking_seconds": 60,
+    "estimated_total_seconds": 180
+  }
+}
