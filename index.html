@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live2D Character Viewer</title>
+  <style>
+    :root{
+      --bg0:#07090d;
+      --bg1:#0b0f17;
+      --panel:#0f141f;
+      --panel2:#121a28;
+      --text:#e9eef7;
+      --muted:#aeb7c7;
+      --outline:rgba(0,0,0,.35);
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius:16px;
+      --btn:#1a1f2c;
+      --btnText:#f4f7ff;
+      --chip:#f2c48d;
+      --chipText:#1a1208;
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 70% 25%, #182234 0%, var(--bg0) 55%, #000 100%);
+      color:var(--text);
+      overflow:hidden;
+    }
+
+    .layout{
+      height:100%;
+      width:100%;
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+      padding: 22px;
+      box-sizing:border-box;
+      gap: 22px;
+    }
+
+    .left{
+      width: 320px;
+      min-width: 320px;
+      background: rgba(18, 26, 40, .75);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 18px 14px 18px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    .title{
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin: 2px 0 12px 0;
+    }
+
+    .desc{
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.45;
+      margin: 0 0 14px 0;
+      white-space: pre-wrap;
+    }
+
+    .buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 10px 10px;
+      margin-bottom: 12px;
+    }
+
+    .chip{
+      appearance:none;
+      border: 1px solid rgba(0,0,0,.35);
+      background: var(--chip);
+      color: var(--chipText);
+      font-weight: 800;
+      padding: 10px 14px;
+      border-radius: 999px;
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25);
+      transition: transform .12s ease, filter .12s ease;
+      font-size: 13px;
+      line-height: 1;
+      user-select:none;
+    }
+    .chip:active{ transform: translateY(1px); }
+    .chip:hover{ filter: brightness(1.03); }
+
+    .reset{
+      width: 100%;
+      margin-top: 6px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(12, 17, 28, .7);
+      color: #dbe5f6;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 14px 28px rgba(0,0,0,.35);
+      transition: transform .12s ease, filter .12s ease;
+      font-size: 13px;
+      user-select:none;
+    }
+    .reset:hover{ filter: brightness(1.06); }
+    .reset:active{ transform: translateY(1px); }
+
+    #status{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12.5px;
+      min-height: 18px;
+    }
+
+    .viewerWrap{
+      flex:1;
+      min-width: 0;
+      background: rgba(0,0,0,.08);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,.06);
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* The PIXI canvas will be appended into #app */
+    #app{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    /* Make sure the canvas doesn't overflow */
+    #app canvas {
+      max-width: 100%;
+      max-height: 100%;
+      display:block;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px){
+      body{ overflow:auto; }
+      .layout{
+        flex-direction:column;
+        align-items:stretch;
+        padding: 14px;
+      }
+      .left{
+        width: 100%;
+        min-width: 0;
+      }
+      .viewerWrap{
+        height: 70vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="left">
+      <div class="title">Live2D Character Viewer</div>
+      <p class="desc">
+Ban nay da duoc day them cam giac "gia 3D": anh sang xoay theo con tro, bong san va do nghi en khe de nhan vat bot phang va trong thuc hon.
+Bam phat voice de nhan vat nhap mieng theo am thanh.
+      </p>
+
+      <div class="buttons">
+        <button id="playMotion" class="chip" type="button">Doi animation</button>
+        <button id="playVoice" class="chip" type="button">Phat voice</button>
+        <button id="switchOutfit" class="chip" type="button">Doi trang phuc</button>
+        <button id="switchHairstyle" class="chip" type="button">Doi kieu toc</button>
+        <button id="switchEyes" class="chip" type="button">Mắt: Gốc</button>
+      </div>
+
+      <div id="hairColorContainer" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.08); display: none;">
+        <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px;">Màu tóc Chibi</div>
+        <div id="hairColorButtons" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+          <button class="color-btn active" data-color="black" style="background:#0e0e0e; border: 2px solid #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;" title="Đen"></button>
+          <button class="color-btn" data-color="brown" style="background:#8b5a2b; border: 1px solid rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;" title="Nâu"></button>
+          <button class="color-btn" data-color="smokywhite" style="background:#d5d5d8; border: 1px solid rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;" title="Trắng khói"></button>
+          <button class="color-btn" data-color="lightbrown" style="background:#c2a078; border: 1px solid rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;" title="Nâu nhạt"></button>
+          <button class="color-btn" data-color="red" style="background:#c82323; border: 1px solid rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;" title="Đỏ"></button>
+          <button class="color-btn" data-color="blue" style="background:#2377c8; border: 1px solid rgba(255,255,255,0.2); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; padding: 0;" title="Xanh dương"></button>
+        </div>
+      </div>
+
+      <button id="resetView" class="reset" type="button">Can lai vi tri</button>
+
+      <div class="upload-container" style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.08);">
+        <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px;">Tai len ao moi (Tach nen & ghep)</div>
+        <input type="file" id="uploadClothingInput" accept="image/*" style="display: none;" />
+        <button id="uploadClothingBtn" class="reset" type="button" style="background: rgba(40, 100, 200, 0.4); color: #fff; margin-bottom: 8px;">Chon file anh ao...</button>
+      </div>
+
+      <div id="status">Dang tai...</div>
+    </aside>
+
+    <section class="viewerWrap">
+      <div id="app"></div>
+    </section>
+  </div>
+
+  <script src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi.js@6.5.2/dist/browser/pixi.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pixi-live2d-display/dist/index.min.js"></script>
+  <script src="viewer.js"></script>
+</body>
+</html>

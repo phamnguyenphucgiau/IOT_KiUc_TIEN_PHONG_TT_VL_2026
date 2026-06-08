@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+Pillow
+numpy
+mediapipe
+opencv-python-headless
+replicate
+python-dotenv
+aiofiles
+requests

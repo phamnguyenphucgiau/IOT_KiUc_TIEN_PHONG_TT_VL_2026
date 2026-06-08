@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Local environment variables
+.env
+
+# Uploads and temporary files
+temp_uploads/
+static/patched/
+processed_faces/
+
+# Archives and large backups
+*.zip
+*.rar
+
+# IDE and tool configuration
+.sixth/
+.vscode/
+.idea/
