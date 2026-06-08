@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Living Memory Frame - Login</title>
+    <!-- Google Identity Services for Google Login -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        :root {
+            --bg-dark: #0a0a0a;
+            --bg-card: rgba(20, 20, 20, 0.7);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --accent: #d4af37; /* Gold */
+            --accent-hover: #f1c40f;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at 50% 0%, #2a2a2a 0%, #0a0a0a 70%);
+        }
+
+        .auth-container {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Gold glow accent at top */
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+        }
+
+        .title {
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .input-group input {
+            width: 100%;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-glass);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--accent), #b8860b);
+            color: #000;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 24px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .divider:not(:empty)::before { margin-right: 15px; }
+        .divider:not(:empty)::after { margin-left: 15px; }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .toggle-form a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: #ff4a4a;
+            font-size: 0.85rem;
+            text-align: center;
+            margin-bottom: 15px;
+            min-height: 20px;
+        }
+
+        /* Google button container */
+        .g_id_signin {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Hide register form initially */
+        #registerForm {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <!-- LOGIN FORM -->
+        <div id="loginForm">
+            <h2 class="title">Memory Frame</h2>
+            <p class="subtitle">Sign in to connect with your frame</p>
+
+            <div id="loginSuccess" style="color: #4CAF50; font-size: 0.85rem; text-align: center; margin-bottom: 15px; display: none;">
+                Registration successful! Please log in.
+            </div>
+            <div id="loginError" class="error-msg"></div>
+
+            <form onsubmit="handleAuth(event, 'login')">
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" required placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn" id="btnLogin">Sign In</button>
+            </form>
+
+            <div class="divider">OR</div>
+
+            <!-- GOOGLE LOGIN BUTTON -->
+            <div id="g_id_onload"
+                 data-client_id="70931765724-ejimdqds3qc0t3qrhn1j8o2i212r6eep.apps.googleusercontent.com"
+                 data-context="signin"
+                 data-ux_mode="popup"
+                 data-callback="handleGoogleLogin"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin"
+                 data-type="standard"
+                 data-shape="rectangular"
+                 data-theme="filled_black"
+                 data-text="signin_with"
+                 data-size="large"
+                 data-logo_alignment="left"
+                 data-width="340">
+            </div>
+
+            <div class="toggle-form">
+                Don't have an account? <a onclick="toggleForms()">Register now</a>
+            </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="registerForm">
+            <h2 class="title">Create Account</h2>
+            <p class="subtitle">Join the memory preservation system</p>
+
+            <div id="regError" class="error-msg"></div>
+
+            <form onsubmit="handleAuth(event, 'register')">
+                <div class="input-group">
+                    <label>Display Name</label>
+                    <input type="text" id="regName" required placeholder="Your name">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="regEmail" required placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="regPassword" required placeholder="Create password">
+                </div>
+                <button type="submit" class="btn" id="btnRegister">Sign Up</button>
+            </form>
+
+            <div class="toggle-form">
+                Already have an account? <a onclick="toggleForms()">Sign in</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForms() {
+            const login = document.getElementById('loginForm');
+            const reg = document.getElementById('registerForm');
+            const loginError = document.getElementById('loginError');
+            const regError = document.getElementById('regError');
+            
+            loginError.textContent = '';
+            regError.textContent = '';
+
+            if (login.style.display === 'none') {
+                login.style.display = 'block';
+                reg.style.display = 'none';
+            } else {
+                login.style.display = 'none';
+                reg.style.display = 'block';
+            }
+        }
+
+        async function handleAuth(e, type) {
+            e.preventDefault();
+            
+            const btn = type === 'login' ? document.getElementById('btnLogin') : document.getElementById('btnRegister');
+            const errorDiv = type === 'login' ? document.getElementById('loginError') : document.getElementById('regError');
+            const originalText = btn.textContent;
+            
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+            errorDiv.textContent = '';
+
+            const payload = {
+                email: type === 'login' ? document.getElementById('loginEmail').value : document.getElementById('regEmail').value,
+                password: type === 'login' ? document.getElementById('loginPassword').value : document.getElementById('regPassword').value,
+            };
+
+            if (type === 'register') {
+                payload.name = document.getElementById('regName').value;
+            }
+
+            try {
+                const res = await fetch(`/${type}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    errorDiv.textContent = data.message || 'An error occurred!';
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Connection error to server.';
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Check URL for registration success
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('registered') === '1') {
+                document.getElementById('loginSuccess').style.display = 'block';
+            }
+        };
+
+        // Google Callback
+        async function handleGoogleLogin(response) {
+            const token = response.credential;
+            const errorDiv = document.getElementById('loginError');
+            
+            try {
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: token })
+                });
+                
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    errorDiv.textContent = data.message || 'Google login failed!';
+                }
+            } catch (err) {
+                errorDiv.textContent = 'Google auth connection error.';
+            }
+        }
+    </script>
+</body>
+</html>

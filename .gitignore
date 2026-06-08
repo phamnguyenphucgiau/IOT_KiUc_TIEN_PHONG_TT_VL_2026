@@ -1,18 +1,40 @@
-# Python cache
+# Python environments & cache
+venv/
+env/
+.env
 __pycache__/
 *.pyc
 
-# Local environment variables
-.env
+# SadTalker / AI Checkpoints (QUAN TRỌNG: Không được đẩy lên Github vì quá nặng)
+**/checkpoints/
+**/weights/
+*.pth
+*.pt
+*.onnx
 
-# Uploads and temporary files
+# Outputs / Uploads
 temp_uploads/
 static/patched/
 processed_faces/
+**/unified_outputs/
+**/unified_uploads/
+**/unified_temp/
 
 # Archives and large backups
 *.zip
 *.rar
+
+# Logs & DB
+*.log
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+.cmake320/
+.cmake324/
+.cmake327/
 
 # IDE and tool configuration
 .sixth/
