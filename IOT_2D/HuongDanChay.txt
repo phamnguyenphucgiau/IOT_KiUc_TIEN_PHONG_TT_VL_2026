@@ -1,0 +1,4 @@
+1. cd vào thư mục Face_Swap
+2. chạy ./launch_unified_pipeline.bat
+3. Bật xampp
+4. truy cập http://localhost:5000/live_chunk

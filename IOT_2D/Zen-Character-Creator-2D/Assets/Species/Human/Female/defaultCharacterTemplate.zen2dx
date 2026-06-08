@@ -1,0 +1,13 @@
+::Species=Human::Gender=Female::Pose=Front Facing::
+Body=[Single]none,#764c39
+Eyes=[Single]portraitStarter,#6b4e43
+Lips=[Single]portraitStarter,#b26f7d
+Blush=[Single]none,#f1c0c7
+Head=[Single]portraitStarter,#ffffff
+Neck=[Single]portraitStarter,#dcc5bc
+Jacket=[Single]none,#b5b5b5
+Chest=[Single]none,#b5b5b5
+Bottom=[Single]none,#b5b5b5
+Feet=[Single]none,#000000
+Mask=[Single]none,#b5b5b5
+Hair=[Single]portraitStarter,#5a463f
