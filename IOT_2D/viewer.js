@@ -43,6 +43,11 @@ let baseTransform = {
   y: 0,
   scale: 1
 };
+let targetTransform = {
+  x: 0,
+  y: 0,
+  scale: 1
+};
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -61,15 +66,24 @@ function fitModelToScreen() {
   model.anchor.set(0.5, 0.5);
 
   const bounds = model.getLocalBounds();
-  const maxWidth = window.innerWidth * 0.58;
+  const leftPanel = document.querySelector(".left");
+  const isCollapsed = leftPanel && leftPanel.classList.contains("collapsed");
+
+  const maxWidth = window.innerWidth * (isCollapsed ? 0.85 : 0.58);
   const maxHeight = window.innerHeight * 0.95;
   const scale = Math.min(maxWidth / bounds.width, maxHeight / bounds.height);
 
-  baseTransform.scale = scale;
-  baseTransform.x = window.innerWidth * 0.6;
-  baseTransform.y = window.innerHeight * 0.58;
+  targetTransform.scale = scale;
+  targetTransform.x = window.innerWidth * (isCollapsed ? 0.5 : 0.6);
+  targetTransform.y = window.innerHeight * 0.58;
 
-  model.scale.set(scale);
+  if (baseTransform.x === 0 && baseTransform.y === 0) {
+    baseTransform.x = targetTransform.x;
+    baseTransform.y = targetTransform.y;
+    baseTransform.scale = targetTransform.scale;
+  }
+
+  model.scale.set(baseTransform.scale);
   model.position.set(baseTransform.x, baseTransform.y);
 }
 
@@ -154,6 +168,8 @@ function bindModelPointer() {
       model.position.set(point.x - dragOffset.x, point.y - dragOffset.y);
       baseTransform.x = model.x;
       baseTransform.y = model.y;
+      targetTransform.x = model.x;
+      targetTransform.y = model.y;
       return;
     }
 
@@ -242,6 +258,13 @@ app.ticker.add(() => {
   motionClock += app.ticker.deltaMS * 0.001;
   pointerSmooth.x += (pointerTarget.x - pointerSmooth.x) * 0.08;
   pointerSmooth.y += (pointerTarget.y - pointerSmooth.y) * 0.08;
+
+  // Smoothly interpolate position and scale towards target values
+  baseTransform.x += (targetTransform.x - baseTransform.x) * 0.1;
+  baseTransform.y += (targetTransform.y - baseTransform.y) * 0.1;
+  baseTransform.scale += (targetTransform.scale - baseTransform.scale) * 0.1;
+
+  model.scale.set(baseTransform.scale);
 
   const headX = pointerSmooth.x * 8;
   const headY = pointerSmooth.y * 5;
@@ -618,6 +641,12 @@ async function loadModel(modelPath) {
       model.scale.set(prevScale.x, prevScale.y);
       model.position.set(prevPosition.x, prevPosition.y);
       model.anchor.set(0.5, 0.5);
+      baseTransform.x = prevPosition.x;
+      baseTransform.y = prevPosition.y;
+      baseTransform.scale = prevScale.x;
+      targetTransform.x = prevPosition.x;
+      targetTransform.y = prevPosition.y;
+      targetTransform.scale = prevScale.x;
     } else {
       fitModelToScreen();
     }
@@ -735,7 +764,7 @@ switchEyesButton.addEventListener("click", async () => {
 
 const uploadClothingInput = document.getElementById("uploadClothingInput");
 const uploadClothingBtn = document.getElementById("uploadClothingBtn");
-const API_BASE_URL = window.location.hostname === "127.0.0.1" ? "http://127.0.0.1:8000" : "http://localhost:8000";
+const API_BASE_URL = `http://${window.location.hostname}:8000`;
 
 uploadClothingBtn.addEventListener("click", () => {
   uploadClothingInput.click();
@@ -833,5 +862,19 @@ colorButtons.forEach(btn => {
     }
   });
 });
+
+// Toggle sidebar panel
+const toggleSidebarButton = document.getElementById("toggleSidebar");
+if (toggleSidebarButton) {
+  toggleSidebarButton.addEventListener("click", () => {
+    const leftPanel = document.querySelector(".left");
+    if (leftPanel) {
+      leftPanel.classList.toggle("collapsed");
+      const isCollapsed = leftPanel.classList.contains("collapsed");
+      toggleSidebarButton.innerHTML = isCollapsed ? "☰ Hiện cài đặt" : "✕ Ẩn cài đặt";
+      fitModelToScreen();
+    }
+  });
+}
 
 init();
